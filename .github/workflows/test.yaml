@@ -1,0 +1,34 @@
+name: Trigger on PR Merge with Comment
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  send-notification:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check if PR was merged with comment
+        id: check-comment
+        run: |
+          pr_number=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
+          comment=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${pr_number}/comments" | jq -r '.[].body')
+          if [[ "$comment" == *"fixes #10"* ]]; then
+            echo "::set-output name=merge_comment::true"
+          else
+            echo "::set-output name=merge_comment::false"
+          fi
+        shell: bash
+
+      - name: Send POST request
+        if: steps.check-comment.outputs.merge_comment == 'true'
+        env:
+          GITHUB_USERNAME: ${{ github.event.pull_request.user.login }}
+          GITHUB_COMMENT: ${{ steps.check-comment.outputs.comment }}
+          AUTHORIZATION_HEADER: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          url= ${{ secrets.SERVER_URL }}
+          payload="{\"username\":\"$GITHUB_USERNAME\",\"comment\":\"$GITHUB_COMMENT\"}"
+          curl -X POST -H "Authorization: $AUTHORIZATION_HEADER" -H "Content-Type: application/json" -d "$payload" "$url"
