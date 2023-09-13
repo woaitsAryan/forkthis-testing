@@ -10,12 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check if PR was merged with comment
+        env:
+          AUTH_HEADER: ${{ secrets.AUTH_TOKEN }}
         id: check-comment
         run: |
           pr_number=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
           merge_comment=false
           issue_tags=""
-          comments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments")
+          comments=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments")
           echo "$comments"
           for comment in $(echo "$comments" | jq -r '.[].body'); do
           echo "$comment"
@@ -23,7 +25,7 @@ jobs:
             echo "yay"
             merge_comment=true
             issue_number=$(echo "$comment" | grep -o -E 'fixes #[0-9]+' | grep -o -E '[0-9]+')
-            issue_tags=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
+            issue_tags=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
             break  # Exit the loop once a relevant comment is found
           fi
           done
