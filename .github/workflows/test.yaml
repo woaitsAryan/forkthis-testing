@@ -36,16 +36,16 @@ jobs:
           GITHUB_TITLE: ${{ steps.check-comment.outputs.merge_title }}
           ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }} 
           GITHUB_URL : ${{ github.event.pull_request.issue_url }}
-          AUTHORIZATION_HEADER: ${{ secrets.TOKEN }}
+          AUTHORIZATION_HEADER: "hello"
+          BACKEND_URL: "https://dbae-152-58-205-207.ngrok-free.app/pullrequest/closed"
         run: |
           echo "$GITHUB_USERNAME"
           echo "$GITHUB_TITLE"
           echo "$ISSUE_TAGS"
           echo "$GITHUB_URL"
           echo "$AUTHORIZATION_HEADER"
-          echo "${{ github.event.pull_request.issue_url }}"
-          url=${{ secrets.URL }}
+          echo "$BACKEND_URL"
 
           payload="{\"username\":\"$GITHUB_USERNAME\",\"title\":\"$GITHUB_TITLE\",\"issue_tags\":\"$ISSUE_TAGS\", \"url\":\"$GITHUB_URL\"}"
 
-          curl -X POST -H "Authorization: $AUTHORIZATION_HEADER" -H "Content-Type: application/json" -d "$payload" "$url"
+          curl -X POST -H "Authorization: $AUTHORIZATION_HEADER" -H "Content-Type: application/json" -d "$payload" "$BACKEND_URL"
