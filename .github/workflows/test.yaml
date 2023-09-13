@@ -17,6 +17,9 @@ jobs:
           pr_number=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
           merge_comment=false
           issue_tags=""
+          echo "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments"
+          echo "${GITHUB_REPOSITORY}"
+          echo "${pr_number}"
           comments=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments")
           echo "$comments"
           for comment in $(echo "$comments" | jq -r '.[].body'); do
