@@ -13,11 +13,11 @@ jobs:
         id: check-comment
         run: |
           pr_number=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
-          comment=$(curl -s -H "Authorization: token ${{ secrets.token }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments" | jq -r '.[].body')
+          comment=$(curl -s -H "Authorization: token ${{ secrets.TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments" | jq -r '.[].body')
           if [[ "$comment" =~ fixes\ #[0-9]+ ]]; then
             echo "::set-output name=merge_comment::true"
             issue_number=$(echo "$comment" | grep -o -E 'fixes #[0-9]+' | grep -o -E '[0-9]+')
-            issue_tags=$(curl -s -H "Authorization: token ${{ secrets.token }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
+            issue_tags=$(curl -s -H "Authorization: token ${{ secrets.TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
             echo "::set-output name=issue_tags::$issue_tags"
           else
             echo "::set-output name=merge_comment::false"
@@ -30,8 +30,8 @@ jobs:
           GITHUB_USERNAME: ${{ github.event.pull_request.user.login }}
           GITHUB_COMMENT: ${{ steps.check-comment.outputs.comment }}
           ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }}
-          AUTHORIZATION_HEADER: ${{ secrets.token }}
+          AUTHORIZATION_HEADER: ${{ secrets.TOKEN }}
         run: |
-          url=${{ secrets.url }}
+          url=${{ secrets.URL }}
           payload="{\"username\":\"$GITHUB_USERNAME\",\"comment\":\"$GITHUB_COMMENT\",\"issue_tags\":\"$ISSUE_TAGS\"}"
           curl -X POST -H "Authorization: $AUTHORIZATION_HEADER" -H "Content-Type: application/json" -d "$payload" "$url"
