@@ -30,11 +30,11 @@ jobs:
         shell: bash
 
       - name: Send POST request
-        if: steps.check-comment.outputs.merge_title == 'true'
+        if: steps.check-comment.outputs.merge_title == 'true' 
         env:
           GITHUB_USERNAME: ${{ github.event.pull_request.user.login }}
           GITHUB_TITLE: ${{ steps.check-comment.outputs.merge_title }}
-          ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }}
+          ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }} 
           GITHUB_URL : ${{ github.event.pull_request.repository_url }}
           AUTHORIZATION_HEADER: ${{ secrets.TOKEN }}
         run: |
@@ -43,6 +43,9 @@ jobs:
           echo "$ISSUE_TAGS"
           echo "$GITHUB_URL"
           echo "$AUTHORIZATION_HEADER"
+          echo "${{github.event.pull_request}}"
+          echo "${{secrets}}"
+
 
           url=${{ secrets.URL }}
 
