@@ -16,9 +16,11 @@ jobs:
           merge_comment=false
           issue_tags=""
           comments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments")
-
+          echo "$comments"
           for comment in $(echo "$comments" | jq -r '.[].body'); do
+          echo "$comment"
           if [[ "$comment" =~ fixes\ #[0-9]+ ]]; then
+            echo "yay"
             merge_comment=true
             issue_number=$(echo "$comment" | grep -o -E 'fixes #[0-9]+' | grep -o -E '[0-9]+')
             issue_tags=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
@@ -37,6 +39,9 @@ jobs:
           ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }}
           AUTHORIZATION_HEADER: ${{ secrets.TOKEN }}
         run: |
+          echo "$GITHUB_USERNAME"
+          echo "$GITHUB_COMMENT"
+          echo "$ISSUE_TAGS"
           url=${{ secrets.URL }}
           payload="{\"username\":\"$GITHUB_USERNAME\",\"comment\":\"$GITHUB_COMMENT\",\"issue_tags\":\"$ISSUE_TAGS\"}"
           curl -X POST -H "Authorization: $AUTHORIZATION_HEADER" -H "Content-Type: application/json" -d "$payload" "$url"
