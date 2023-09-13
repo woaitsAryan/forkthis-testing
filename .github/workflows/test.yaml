@@ -30,7 +30,7 @@ jobs:
           GITHUB_USERNAME: ${{ github.event.pull_request.user.login }}
           GITHUB_COMMENT: ${{ steps.check-comment.outputs.comment }}
           ISSUE_TAGS: ${{ steps.check-comment.outputs.issue_tags }}
-          AUTHORIZATION_HEADER: ${{ secrets.GITHUB_TOKEN }}
+          AUTHORIZATION_HEADER: ${{ secrets.token }}
         run: |
           url=${{ secrets.url }}
           payload="{\"username\":\"$GITHUB_USERNAME\",\"comment\":\"$GITHUB_COMMENT\",\"issue_tags\":\"$ISSUE_TAGS\"}"
