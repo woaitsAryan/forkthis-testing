@@ -13,15 +13,20 @@ jobs:
         id: check-comment
         run: |
           pr_number=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
-          comment=$(curl -s -H "Authorization: token ${{ secrets.TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments" | jq -r '.[].body')
+          merge_comment=false
+          issue_tags=""
+          comments=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls/${pr_number}/comments")
+
+          for comment in $(echo "$comments" | jq -r '.[].body'); do
           if [[ "$comment" =~ fixes\ #[0-9]+ ]]; then
-            echo "::set-output name=merge_comment::true"
+            merge_comment=true
             issue_number=$(echo "$comment" | grep -o -E 'fixes #[0-9]+' | grep -o -E '[0-9]+')
-            issue_tags=$(curl -s -H "Authorization: token ${{ secrets.TOKEN }}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
-            echo "::set-output name=issue_tags::$issue_tags"
-          else
-            echo "::set-output name=merge_comment::false"
+            issue_tags=$(curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}/labels" | jq -r '.[].name')
+            break  # Exit the loop once a relevant comment is found
           fi
+          done
+          echo "::set-output name=merge_comment::$merge_comment"
+          echo "::set-output name=issue_tags::$issue_tags"
         shell: bash
 
       - name: Send POST request
