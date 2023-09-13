@@ -23,7 +23,7 @@ jobs:
             echo "yay"
             merge_title=true
             issue_number=$(echo "$title" | grep -o -E 'fixes #[0-9]+' | grep -o -E '[0-9]+')
-            issue_tags=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}" | jq -r '.[].labels')
+            issue_tags=$(curl -s "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${issue_number}" | jq -r '.labels')
           fi
           echo "::set-output name=merge_title::$merge_title"
           echo "::set-output name=issue_tags::$issue_tags"
